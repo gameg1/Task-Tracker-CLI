@@ -18,9 +18,24 @@ import json, os, argparse
 from datetime import datetime
 
 pars = argparse.ArgumentParser(
-    prog= "Tasktracker.py"
+    description= "Manages taks via the command line",
+    epilog= "Example usage: python Tasktracker.py filename.json -a 'New Task"
 )
+# Creating the arguments
+pars.add_argument("-a","--add", help= "Adds a task to the list",required= False)
+pars.add_argument("-l","--list", help="Type '-l todo/in-progress/done/all to show that cateory of tasks",requierd= False)
+pars.add_argument("-m","--mark",help="Changes the status of desired task to todo/in-progress/done",requierd= False)
+pars.add_argument("-d","--delete",help="Deletes the desired task",requierd= False)
+pars.add_argument("-u","--update",help="Changes the description of the desired task",requierd= False)
 
+#Processing the argument
+
+args = pars.parse_args()
+
+file_path = "task_tracker.json"
+
+time = datetime.now()
+formatted_time = time.strftime('%H:%M %d %M %Y')
 
 def add_task():
     pass
@@ -33,4 +48,7 @@ def update_status(id, status):
     pass
 
 def list_task ():
+    pass
+
+def upadate_task_it():
     pass
