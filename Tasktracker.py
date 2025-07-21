@@ -21,7 +21,7 @@ def main():
         case "add":
             add_task(arguments[2])
         case "update":
-            update_task(arguments[2],arguments[3])
+            update_task(int(arguments[2]),arguments[3])
         case "delete":
             delete_task(int(arguments[2]))
         case "mark":
@@ -76,8 +76,27 @@ def add_task(message:str):
 
 
 
-def update_task():
-    print(args.update, args.message)
+def update_task(id:int = -1, message = ""):
+    print(id)
+    update = False
+    item_to_update = None
+    with open(file_path,"r") as file:
+        data = json.load(file)
+        for item in data:
+            if int(item["id"]) == id:
+                update = True
+                item_to_update = item
+                data.remove(item)
+                break
+        if update == True:
+            item_to_update["description"] = message
+            item_to_update["updatedAt"] = formatted_time
+            data.append(item_to_update)
+            with open(file_path,"w") as file:
+                json.dump(data, file, indent = 4)
+        else:
+            print("not working")
+
 def delete_task(id:int = -1):
     removetask = False
     task_to_remove = None
@@ -98,8 +117,8 @@ def delete_task(id:int = -1):
         else:
             pass
 
-def update_status(id:int = -1):
-    print(id, args.mark)
+def update_status(imessage:str,d:int = -1):
+    pass
 
 def list_task(mode:str = ""):
     with open(file_path, "r") as file:
