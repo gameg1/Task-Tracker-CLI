@@ -16,24 +16,44 @@ from datetime import datetime
 def main():
     arguments = sys.argv
     # print(arguments)
-
-    match arguments[1]:
-        case "add":
-            add_task(arguments[2])
-        case "update":
-            update_task(int(arguments[2]),arguments[3])
-        case "delete":
-            delete_task(int(arguments[2]))
-        case "mark":
-            update_status(arguments[2], arguments[3])
-        case"list":
-            try:
-                if arguments[2] == "done" or "todo" or "in-progress":
-                    list_task(arguments[2])
-            except IndexError:
-                list_task()
-        case _:
-            EOFError("Error: Command Not Recocnized")
+    if 3 <= len(arguments) > 0:
+        match arguments[1]:
+            case "add":
+                if len(arguments) == 2:
+                    add_task(arguments[2])
+                else:
+                    print("Error: Incorrect number of arguments")
+                    exit()
+            case "update":
+                if len(arguments) == 3:
+                    update_task(int(arguments[2]),arguments[3])
+                else:
+                    print("Error: Incorrect number of arguments")
+                    exit()
+            case "delete":
+                if len(arguments) == 2:
+                    delete_task(int(arguments[2]))
+                else:
+                    print("Error: Incorrect number of arguments")
+            case "mark":
+                if len(arguments) == 3:
+                    update_status(int(arguments[2]), arguments[3])
+                else:
+                    print("Error: Incorrect number of arguments")
+            case"list":
+                if len(arguments) == 2:
+                    try:
+                        if arguments[2] == "done" or "todo" or "in-progress":
+                            list_task(arguments[2])
+                    except IndexError:
+                        list_task()
+                else:
+                    print("Error: Incorrect number of arguments")
+            case _:
+                EOFError("Error: Command Not Recocnized")
+    else:
+        print("Incorrect num of arguments")
+        exit
 file_path = "task_tracker.json"
 
 time = datetime.now()
@@ -94,8 +114,7 @@ def update_task(id:int = -1, message = ""):
             data.append(item_to_update)
             with open(file_path,"w") as file:
                 json.dump(data, file, indent = 4)
-        else:
-            print("not working")
+            print(f"task id: {id} has been updated to {message}")
 
 def delete_task(id:int = -1):
     removetask = False
@@ -117,8 +136,23 @@ def delete_task(id:int = -1):
         else:
             pass
 
-def update_status(imessage:str,d:int = -1):
-    pass
+def update_status(id:int = -1, status:str = "todo"):
+    statusupdate = False
+    task_to_update = None
+    with open(file_path, "r") as file:
+        data = json.load(file)
+        for item in data:
+            if int(item["id"]) == id:
+                statusupdate = True
+                task_to_update = item
+                data.remove(item)
+        if statusupdate == True:
+            task_to_update["status"] = status
+            task_to_update["UpdatedAt"] = formatted_time
+            data.append(task_to_update)
+            with open(file_path, "w") as file:
+                json.dump(data,file,indent=4)
+            print(f"file id: {id} status has been updated to {status}")
 
 def list_task(mode:str = ""):
     with open(file_path, "r") as file:
