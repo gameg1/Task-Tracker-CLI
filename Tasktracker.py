@@ -15,7 +15,7 @@ from datetime import datetime
 
 def main():
     arguments = sys.argv
-    #print(arguments)
+    # print(arguments)
 
     match arguments[1]:
         case "add":
@@ -23,13 +23,13 @@ def main():
         case "update":
             update_task(arguments[2],arguments[3])
         case "delete":
-            delete_task(arguments[2])
+            delete_task(int(arguments[2]))
         case "mark":
             update_status(arguments[2], arguments[3])
         case"list":
             try:
-                if arguments[2] == ("done" or "todo" or "in-progress"):
-                    list_task([arguments[2]])
+                if arguments[2] == "done" or "todo" or "in-progress":
+                    list_task(arguments[2])
             except IndexError:
                 list_task()
         case _:
@@ -46,7 +46,6 @@ formatted_time = time.strftime('%H:%M %d %m %Y')
 # updatedAt: The date and time when the task was updated
 def add_task(message:str):
     # add the add argument into task
-
     if os.path.exists(file_path):
         with open(file_path,"r") as file:
                 data = json.load(file)
@@ -79,22 +78,49 @@ def add_task(message:str):
 
 def update_task():
     print(args.update, args.message)
-def delete_task():
-    pass
+def delete_task(id:int = -1):
+    removetask = False
+    task_to_remove = None
+    with open(file_path, "r") as file:
+        data = json.load(file)
+        for item in data:
+            if int(item["id"]) == id:
+                removetask = True
+                task_to_remove = item
+                break
+        if removetask == True:
+            data.remove(task_to_remove)
+            with open(file_path, "w") as file:
+                json.dump(data,file, indent = 4)
+            upadate_task_id(id)
+            print(f"Task status from id: {id}")
+            print(f"has been deleted")
+        else:
+            pass
+
 def update_status(id:int = -1):
     print(id, args.mark)
 
 def list_task(mode:str = ""):
-    
     with open(file_path, "r") as file:
         data = json.load(file)
         for item in data:
             if item["status"] == mode or mode == "": # If the task is the same as the status we are looking for or if we are looking for all the tasks
                 print (f"id:{item["id"]}, desc: {item["description"]}, status: {item["status"]}")
-            
 
-def upadate_task_id():
-    pass
+
+
+def upadate_task_id(id:int = -1):
+    task = None
+    with open(file_path,"r") as file:
+        data = json.load(file)
+        for index,item in enumerate(data):
+            if int(item["id"]) > id:
+                data.remove(item)
+                item["id"] = int(item["id"]) - 1
+                data.append(item)
+        with open(file_path,"w") as file:
+            json.dump(data,file, indent = 4)
 
 
 if __name__ == "__main__":
