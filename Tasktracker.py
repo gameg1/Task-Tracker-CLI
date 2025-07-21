@@ -9,96 +9,93 @@
 
 
 
-import json, os, argparse
+import json, os, argparse,sys
 from datetime import datetime
 
-pars = argparse.ArgumentParser(
-    description= "Manages taks via the command line",
-    epilog= "Example usage: python Tasktracker.py filename.json -a 'New Task"
-)
-# Creating the arguments
 
-pars.add_argument("-id", help = "The id of the task you want to access", type= int, default = -1)
-pars.add_argument("-a","--add", help= "Adds a task to the list",type= str)
-pars.add_argument("-l","--list", help="Type '-l todo/in-progress/done/all to show that cateory of tasks",choices= ["todo","in-progress","done","all"], default = "all")
-pars.add_argument("-m","--mark",help="Changes the status of desired task to todo/in-progress/done",type=str, choices =["todo","in-progress","done"])
-pars.add_argument("-d","--delete",help="Deletes the desired task", type = int, default= -1)
-pars.add_argument("-u","--update",help="Changes the description of the desired task via id")
+def main():
+    arguments = sys.argv
+    #print(arguments)
 
-# Processing the argument
-# Allows use to use the arguments and get the information to usterlize it.
-args:argparse.Namespace = pars.parse_args()
-
+    match arguments[1]:
+        case "add":
+            add_task(arguments[2])
+        case "update":
+            update_task(arguments[2],arguments[3])
+        case "delete":
+            delete_task(arguments[2])
+        case "mark":
+            update_status(arguments[2], arguments[3])
+        case"list":
+            try:
+                if arguments[2] == ("done" or "todo" or "in-progress"):
+                    list_task([arguments[2]])
+            except IndexError:
+                list_task()
+        case _:
+            EOFError("Error: Command Not Recocnized")
 file_path = "task_tracker.json"
 
 time = datetime.now()
-formatted_time = time.strftime('%H:%M %d %M %Y')
+formatted_time = time.strftime('%H:%M %d %m %Y')
 # Task Properties
 # id: A unique identifier for the task
 # description: A short description of hte task
 # status: the status of the task (todo, in-progress, done)
 # createdAt: The date and time when the task was created
 # updatedAt: The date and time when the task was updated
-def add_task():
+def add_task(message:str):
     # add the add argument into task
-    task = args.add
-    if not os.path.exists(file_path):
-        # Create a task as a dict because of a new json file
+
+    if os.path.exists(file_path):
+        with open(file_path,"r") as file:
+                data = json.load(file)
+
+                last_id = max(item["id"] for item in data) if data else 0
+                tasks = {
+                "id": last_id + 1,
+                "description":message,
+                "status": "todo",
+                "createdAt": formatted_time,
+                "updatedAt": formatted_time
+                }
+                data.append(tasks)
+        with open(file_path,"w") as file:
+                json.dump(data, file, indent = 4)
+    else:
         tasks = [
             {
                 "id":1,
-                "description":args.add,
+                "description":message,
                 "status": "todo",
                 "createdAt": formatted_time,
                 "updatedAt": formatted_time
             }
-        ]
+            ]
         with open(file_path,"w") as file:
-            json.dump(tasks, file, indent= 4)
-    # If the file exists, add into the json file
-    else:
-        with open(file_path,"r") as file:
-            data = json.load(file)
-            # get the last id from json file
-            last_id = max(item["id"] for item in data) if data else 0
-            new_task = {
-                "id":last_id + 1,
-                "description":args.add,
-                "status": "todo",
-                "createdAt": formatted_time,
-                "updatedAt": formatted_time
-            }
-
-        with open(file_path, "w") as file:
-            json.dump(data, file, indent = 4)
+            json.dump(tasks, file, indent = 4)
 
 
-def update_task(id:int = -1):
+
+def update_task():
     print(args.update, args.message)
-def delete_task(id:int = -1):
+def delete_task():
     pass
 def update_status(id:int = -1):
     print(id, args.mark)
 
-def list_task():
+def list_task(mode:str = ""):
     
     with open(file_path, "r") as file:
         data = json.load(file)
         for item in data:
-            if item["status"] == args.list or args.list == "all": # If the task is the same as the status we are looking for or if we are looking for all the tasks
+            if item["status"] == mode or mode == "": # If the task is the same as the status we are looking for or if we are looking for all the tasks
                 print (f"id:{item["id"]}, desc: {item["description"]}, status: {item["status"]}")
             
 
 def upadate_task_id():
     pass
 
-if args.add:
-    add_task()
-if args.list:
-    list_task()
-if args.mark:
-    update_status()
-if args.delete:
-    delete_task()
-if args.update:
-    update_task()
+
+if __name__ == "__main__":
+    main()
