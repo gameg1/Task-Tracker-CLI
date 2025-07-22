@@ -15,44 +15,44 @@ from datetime import datetime
 
 def main():
     arguments = sys.argv
-    # print(arguments)
-    if 3 <= len(arguments) > 0:
+    print(len(arguments))
+    if 5 > len(arguments) >= 2:
         match arguments[1]:
             case "add":
-                if len(arguments) == 2:
+                if len(arguments) == 3:
                     add_task(arguments[2])
                 else:
-                    print("Error: Incorrect number of arguments")
+                    print("Error: Incorrect number of arguments for add command")
                     exit()
             case "update":
-                if len(arguments) == 3:
+                if len(arguments) == 4:
                     update_task(int(arguments[2]),arguments[3])
                 else:
-                    print("Error: Incorrect number of arguments")
+                    print("Error: Incorrect number of arguments for update command")
                     exit()
             case "delete":
-                if len(arguments) == 2:
+                if len(arguments) == 4:
                     delete_task(int(arguments[2]))
                 else:
-                    print("Error: Incorrect number of arguments")
+                    print("Error: Incorrect number of arguments for delete command")
             case "mark":
-                if len(arguments) == 3:
+                if len(arguments) == 4:
                     update_status(int(arguments[2]), arguments[3])
                 else:
-                    print("Error: Incorrect number of arguments")
+                    print("Error: Incorrect number of arguments for mark command")
             case"list":
-                if len(arguments) == 2:
+                if len(arguments) == 2 or len(arguments) == 3:
                     try:
                         if arguments[2] == "done" or "todo" or "in-progress":
                             list_task(arguments[2])
                     except IndexError:
                         list_task()
                 else:
-                    print("Error: Incorrect number of arguments")
+                    print("Error: Incorrect number of arguments for list command")
             case _:
                 EOFError("Error: Command Not Recocnized")
     else:
-        print("Incorrect num of arguments")
+        print("Incorrect number of arguments for task tracker")
         exit
 file_path = "task_tracker.json"
 
