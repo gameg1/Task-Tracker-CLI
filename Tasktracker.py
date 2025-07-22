@@ -14,46 +14,36 @@ from datetime import datetime
 
 
 def main():
-    arguments = sys.argv
-    print(len(arguments))
-    if 5 > len(arguments) >= 2:
-        match arguments[1]:
-            case "add":
-                if len(arguments) == 3:
-                    add_task(arguments[2])
-                else:
-                    print("Error: Incorrect number of arguments for add command")
-                    exit()
-            case "update":
-                if len(arguments) == 4:
-                    update_task(int(arguments[2]),arguments[3])
-                else:
-                    print("Error: Incorrect number of arguments for update command")
-                    exit()
-            case "delete":
-                if len(arguments) == 4:
-                    delete_task(int(arguments[2]))
-                else:
-                    print("Error: Incorrect number of arguments for delete command")
-            case "mark":
-                if len(arguments) == 4:
-                    update_status(int(arguments[2]), arguments[3])
-                else:
-                    print("Error: Incorrect number of arguments for mark command")
-            case"list":
-                if len(arguments) == 2 or len(arguments) == 3:
-                    try:
-                        if arguments[2] == "done" or "todo" or "in-progress":
-                            list_task(arguments[2])
-                    except IndexError:
-                        list_task()
-                else:
-                    print("Error: Incorrect number of arguments for list command")
-            case _:
-                EOFError("Error: Command Not Recocnized")
-    else:
-        print("Incorrect number of arguments for task tracker")
-        exit
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument("command",nargs= 1, help= "The Command you want to run Choose from: \n" \
+    "add :add a task to the tracker - add 'foobar'\n" \
+    "update :updates the message of the task - update 2 'barfoo'\n" \
+    "delete : delete a task using its id - delete 2\n" \
+    "mark : changes the status of the task using the id - mark 3 done \n" \
+    "list : prints out a list of the tasks you've added to the tracker. can also filter it by status - list done \n",
+                         choices=["add","update","delete","mark","list"])
+    parser.add_argument("arguments", nargs = "*",)
+    args:argparse.Namespace = parser.parse_args()
+    print(args)
+
+
+    # arguments = sys.argv
+    # if 5 > len(arguments) >= 2:
+    match args.command[0]:
+        case "add":
+            add_task(args.arguments[0])
+        case "update":
+            update_task(int(args.arguments[0]),args.arguments[1])
+        case "delete":
+            delete_task(int(args.arguments[0]))
+        case "mark":
+            update_status(int(args.arguments[0]), args.arguments[1])
+        case"list":
+            if len(args.arguments) > 0:
+                if args.arguments[0] == "done" or "todo" or "in-progress":
+                    list_task(args.arguments[0])
+            elif len(args.arguments) == 0:
+                list_task()
 file_path = "task_tracker.json"
 
 time = datetime.now()
@@ -81,6 +71,7 @@ def add_task(message:str):
                 data.append(tasks)
         with open(file_path,"w") as file:
                 json.dump(data, file, indent = 4)
+                print(f"task added at id: {last_id + 1}")
     else:
         tasks = [
             {
@@ -93,6 +84,7 @@ def add_task(message:str):
             ]
         with open(file_path,"w") as file:
             json.dump(tasks, file, indent = 4)
+            print("task added at id: 1")
 
 
 
